@@ -50,7 +50,18 @@
       box-shadow:0 6px 24px rgba(0,0,0,.15)
     }
     .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-    .controls{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:12px}
+    .controls{
+        display:grid;
+        grid-template-columns: 2fr 0.5fr 0.5fr 1fr; /* garment desc gets more space, seed/steps smaller */
+        gap:12px;
+        margin-top:12px;
+      }
+      .controls input#desc{
+        width:100%;
+      }
+      #seed{
+        max-width:120px; /* make seed smaller */
+      }
     label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
 
     input[type="text"], input[type="number"], select {
@@ -334,3 +345,4 @@
   </script>
 </body>
 </html>
+
