@@ -119,11 +119,14 @@
 <body>
   <header>
     <h1>👗 Virtual Try-On - For my Princess Hagar</h1>
-    <span id="status-pill" class="pill"><span class="dot s-idle"></span><span id="status-text">Idle</span></span>
+    <span id="status-pill" class="pill">
+      <span class="dot s-idle"></span>
+      <span id="status-text">Idle</span>
+    </span>
     <span id="uptime" class="hint"></span>
-    <button id="wake" class="btn secondary" title="Wake the Space if it is sleeping">Wake</button>
     <button id="ping" class="btn secondary" title="Ping view_api() to check readiness">Ping</button>
   </header>
+
 
   <main class="card">
     <div class="grid">
@@ -323,10 +326,11 @@
         btnRun.disabled = false;
       }
     }
-    btnWake.addEventListener('click', ()=>wakeSpace().catch(()=>{}));
+    // btnWake.addEventListener('click', ()=>wakeSpace().catch(()=>{}));
     btnPing.addEventListener('click', ()=>ping());
     btnRun.addEventListener('click', ()=>runTryOn());
     wakeSpace().catch(err=>{ log('Auto-wake failed: '+(err?.message||err)); });
+    ping();
   </script>
 </body>
 </html>
