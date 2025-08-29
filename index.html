@@ -241,9 +241,7 @@
     garmentIn.addEventListener('change', ()=>preview(garmentIn, garmentPrev));
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     async function connectOnce(){
-      client = await Client.connect(SPACE, {
-        hf_token: "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"
-      });
+      client = await Client.connect(SPACE);
       return client;
     }
     async function wakeSpace({timeoutMs=120000, pollMs=3000}={}){
