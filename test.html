@@ -11,6 +11,7 @@
       --ink:#4a3b47;     /* deep mauve text */
       --muted:#9b7c92;   /* muted lilac for labels/hints */
       --accent:#d77bba;  /* vibrant rose accent */
+      
       --good:#a3d9b1;    /* minty green */
       --warn:#ffd28a;    /* warm peach */
       --bad:#ff8a9a;     /* soft coral red */
@@ -26,7 +27,7 @@
     }
     header{
       max-width:980px; margin:24px auto 8px; padding:0 16px; 
-      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+      display:flex; gap:12px; align-items:center;
     }
     h1{font-size:22px; margin:0; font-weight:700}
     .pill{
@@ -51,12 +52,16 @@
     .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
     .controls{
         display:grid;
-        grid-template-columns: 2fr 0.5fr 0.5fr 1fr;
+        grid-template-columns: 2fr 0.5fr 0.5fr 1fr; /* garment desc gets more space, seed/steps smaller */
         gap:12px;
         margin-top:12px;
       }
-      .controls input#desc{ width:100% }
-      #seed{ max-width:120px }
+      .controls input#desc{
+        width:100%;
+      }
+      #seed{
+        max-width:120px; /* make seed smaller */
+      }
     label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
 
     input[type="text"], input[type="number"], select {
@@ -133,6 +138,7 @@
     <button id="ping" class="btn secondary" title="Ping view_api() to check readiness">Ping</button>
   </header>
 
+
   <main class="card">
     <div class="grid">
       <div>
@@ -183,7 +189,7 @@
     <pre id="log"></pre>
     <p class="hint">Tip: If your Space is private, add your token below. Never commit tokens to public repos.</p>
     <div class="row">
-      <input id="token" type="text" placeholder="paste" style="flex:1" />
+      <input id="token" type="text" placeholder="Hugging Face token (optional for private Spaces)" style="flex:1" />
     </div>
 
     <!-- small loader at the bottom -->
@@ -193,166 +199,149 @@
     </div>
   </main>
 
-<script type="module">
-  window.VAL1 = "mBOoWsq";
-  window.VAL2 = "TUByOjt";
-  window.VAL3 = "IASTCo";
-  window.VAL4 = "UumXxS";
-  window.VAL5 = "fPnfRbUX";
-  import { Client } from "https://esm.sh/@gradio/client@1.5.0";
-  const SPACE = "arielmozes/fitting_room";
-  const API   = "/tryon";
-  let client = null;
+  <script type="module">
+    import { Client } from "https://esm.sh/@gradio/client@1.5.0";
+    const SPACE = "arielmozes/fitting_room";
+    const API   = "/tryon";
+    let client = null;
 
-  const statusPill = document.getElementById("status-pill");
-  const statusText = document.getElementById("status-text");
-  const uptimeEl   = document.getElementById("uptime");
-  const logEl      = document.getElementById("log");
-  const outEl      = document.getElementById("out");
-  const loaderEl   = document.getElementById("loader");
-  const btnPing = document.getElementById("ping");
-  const btnRun  = document.getElementById("run");
-  const personIn = document.getElementById("person");
-  const garmentIn= document.getElementById("garment");
-  const personPrev = document.getElementById("person-preview");
-  const garmentPrev= document.getElementById("garment-preview");
-  const descIn  = document.getElementById("desc");
-  const autoIn  = document.getElementById("auto");
-  const cropIn  = document.getElementById("crop");
-  const stepsIn = document.getElementById("steps");
-  const seedIn  = document.getElementById("seed");
-  const tokenIn = document.getElementById("token");
+    const statusPill = document.getElementById("status-pill");
+    const statusText = document.getElementById("status-text");
+    const uptimeEl   = document.getElementById("uptime");
+    const logEl      = document.getElementById("log");
+    const outEl      = document.getElementById("out");
+    const loaderEl   = document.getElementById("loader");
+    const btnWake = document.getElementById("wake");
+    const btnPing = document.getElementById("ping");
+    const btnRun  = document.getElementById("run");
+    const personIn = document.getElementById("person");
+    const garmentIn= document.getElementById("garment");
+    const personPrev = document.getElementById("person-preview");
+    const garmentPrev= document.getElementById("garment-preview");
+    const descIn  = document.getElementById("desc");
+    const autoIn  = document.getElementById("auto");
+    const cropIn  = document.getElementById("crop");
+    const stepsIn = document.getElementById("steps");
+    const seedIn  = document.getElementById("seed");
+    const tokenIn = document.getElementById("token");
 
-  // 🔑 Hard-coded Hugging Face token
-  const HF_TOKEN = "hf_" + window.VAL1 + window.VAL2 + window.VAL3 + window.VAL4 + window.VAL5;
-  tokenIn.value = HF_TOKEN;  // fill the input automatically
-
-  function setStatus(mode, extra){
-    const dot = statusPill.querySelector('.dot');
-    dot.className = 'dot s-idle';
-    let txt = 'Idle';
-    if(mode==='waking'){ dot.className='dot s-waking'; txt='Waking…'; }
-    if(mode==='ready'){ dot.className='dot s-ready'; txt='Ready'; }
-    if(mode==='working'){ dot.className='dot s-working'; txt='Working…'; }
-    if(mode==='error'){ dot.className='dot s-error'; txt='Error'; }
-    statusText.textContent = extra ? `${txt} (${extra})` : txt;
-  }
-  function showLoader(){ loaderEl.style.display = "block"; }
-  function hideLoader(){ loaderEl.style.display = "none"; }
-  function log(msg){
-    const time = new Date().toLocaleTimeString();
-    logEl.textContent += `[${time}] ${msg}\n`;
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-  function preview(input, container){
-    container.innerHTML = '';
-    const f = input.files[0];
-    if(!f) return;
-    const img = document.createElement('img');
-    img.className = 'preview';
-    img.src = URL.createObjectURL(f);
-    container.appendChild(img);
-  }
-  personIn.addEventListener('change', ()=>preview(personIn, personPrev));
-  garmentIn.addEventListener('change', ()=>preview(garmentIn, garmentPrev));
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-  async function connectOnce(){
-    if (client) return client;
-    log(`Connecting with hf_token…`);
-    client = await Client.connect(SPACE, { hf_token: HF_TOKEN });
-    return client;
-  }
-
-  async function wakeSpace({timeoutMs=120000, pollMs=3000}={}){
-    setStatus('waking');
-    const start = Date.now(); let attempt = 0;
-    while(Date.now() - start < timeoutMs){
-      attempt++;
-      try{
-        const c = await connectOnce();
-        await c.view_api();
-        const took = Math.round((Date.now()-start)/1000);
-        setStatus('ready', took+ 's');
-        uptimeEl.textContent = `woke in ${took}s`;
-        log(`Space is ready (after ${took}s, attempt ${attempt}).`);
-        return c;
-      }catch(e){
-        log(`Wake attempt ${attempt} failed: ${e?.message || e}`);
-        await sleep(pollMs);
-      }
+    function setStatus(mode, extra){
+      const dot = statusPill.querySelector('.dot');
+      dot.className = 'dot s-idle';
+      let txt = 'Idle';
+      if(mode==='waking'){ dot.className='dot s-waking'; txt='Waking…'; }
+      if(mode==='ready'){ dot.className='dot s-ready'; txt='Ready'; }
+      if(mode==='working'){ dot.className='dot s-working'; txt='Working…'; }
+      if(mode==='error'){ dot.className='dot s-error'; txt='Error'; }
+      statusText.textContent = extra ? `${txt} (${extra})` : txt;
     }
-    setStatus('error', 'wake timeout');
-    throw new Error('Wake timeout');
-  }
-
-  async function ping(){
-    try{
-      const t0 = performance.now();
-      const c = await connectOnce();
-      await c.view_api();
-      const ms = Math.round(performance.now()-t0);
-      log(`Ping OK (${ms} ms)`);
-      setStatus('ready');
-    }catch(e){
-      log(`Ping error: ${e?.message || e}`);
+    function showLoader(){ loaderEl.style.display = "block"; }
+    function hideLoader(){ loaderEl.style.display = "none"; }
+    function log(msg){
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+    function preview(input, container){
+      container.innerHTML = '';
+      const f = input.files[0];
+      if(!f) return;
+      const img = document.createElement('img');
+      img.className = 'preview';
+      img.src = URL.createObjectURL(f);
+      container.appendChild(img);
+    }
+    personIn.addEventListener('change', ()=>preview(personIn, personPrev));
+    garmentIn.addEventListener('change', ()=>preview(garmentIn, garmentPrev));
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    async function connectOnce(){
+      client = await Client.connect(SPACE);
+      return client;
+    }
+    async function wakeSpace({timeoutMs=120000, pollMs=3000}={}){
       setStatus('waking');
-    }
-  }
-
-  async function runTryOn(){
-    const person = personIn.files[0];
-    const garment = garmentIn.files[0];
-    if(!person || !garment){ alert('Choose both images'); return; }
-    outEl.innerHTML = '';
-    try{
-      btnRun.disabled = true; showLoader();
-      const c = await wakeSpace();
-      setStatus('working');
-      const payload = [
-        { background: person, layers: [] },
-        garment,
-        descIn.value || "Short sleeve round neck T-shirt",
-        Boolean(autoIn.checked),
-        Boolean(cropIn.checked),
-        Number(stepsIn.value || 30),
-        Number(seedIn.value || 42)
-      ];
-      log('Submitting job…');
-      const t0 = performance.now();
-      const result = await c.predict(API, payload);
-      const ms = Math.round(performance.now()-t0);
-      log(`Job finished in ${ms} ms.`);
-      for(const item of (result?.data || [])){
-        const url = item?.url || item;
-        if(typeof url === 'string'){
-          const img = document.createElement('img');
-          img.src = url; img.className = 'preview';
-          outEl.appendChild(img);
-        } else {
-          const pre = document.createElement('pre');
-          pre.textContent = JSON.stringify(item, null, 2);
-          outEl.appendChild(pre);
+      const start = Date.now(); let attempt = 0;
+      while(Date.now() - start < timeoutMs){
+        attempt++;
+        try{
+          const c = await connectOnce();
+          await c.view_api();
+          const took = Math.round((Date.now()-start)/1000);
+          setStatus('ready', took+ 's');
+          uptimeEl.textContent = `woke in ${took}s`;
+          log(`Space is ready (after ${took}s, attempt ${attempt}).`);
+          return c;
+        }catch(e){
+          log(`Wake attempt ${attempt} failed: ${e?.message || e}`);
+          await sleep(pollMs);
         }
       }
-      setStatus('ready');
-    }catch(e){
-      log(`ERROR: ${e?.message || e}`);
-      setStatus('error');
-      alert('Error: ' + (e?.message || e));
-    } finally {
-      hideLoader();
-      btnRun.disabled = false;
+      setStatus('error', 'wake timeout');
+      throw new Error('Wake timeout');
     }
-  }
-
-  btnPing.addEventListener('click', ()=>ping());
-  btnRun.addEventListener('click', ()=>runTryOn());
-
-  // 🔥 auto-wake immediately with the hard-coded token
-  wakeSpace().catch(err=>{ log('Auto-wake failed: '+(err?.message||err)); });
-  ping();
-</script>
-
+    async function ping(){
+      try{
+        const t0 = performance.now();
+        const c = client || await connectOnce();
+        await c.view_api();
+        const ms = Math.round(performance.now()-t0);
+        log(`Ping OK (${ms} ms)`);
+        setStatus('ready');
+      }catch(e){
+        log(`Ping error: ${e?.message || e}`);
+        setStatus('waking');
+      }
+    }
+    async function runTryOn(){
+      const person = personIn.files[0];
+      const garment = garmentIn.files[0];
+      if(!person || !garment){ alert('Choose both images'); return; }
+      outEl.innerHTML = '';
+      try{
+        btnRun.disabled = true; showLoader();
+        if(!client) client = await wakeSpace();
+        setStatus('working');
+        const payload = [
+          { background: person, layers: [] },
+          garment,
+          descIn.value || "Short sleeve round neck T-shirt",
+          Boolean(autoIn.checked),
+          Boolean(cropIn.checked),
+          Number(stepsIn.value || 30),
+          Number(seedIn.value || 42)
+        ];
+        log('Submitting job…');
+        const t0 = performance.now();
+        const result = await client.predict(API, payload);
+        const ms = Math.round(performance.now()-t0);
+        log(`Job finished in ${ms} ms.`);
+        for(const item of (result?.data || [])){
+          const url = item?.url || item;
+          if(typeof url === 'string'){
+            const img = document.createElement('img');
+            img.src = url; img.className = 'preview';
+            outEl.appendChild(img);
+          } else {
+            const pre = document.createElement('pre');
+            pre.textContent = JSON.stringify(item, null, 2);
+            outEl.appendChild(pre);
+          }
+        }
+        setStatus('ready');
+      }catch(e){
+        log(`ERROR: ${e?.message || e}`);
+        setStatus('error');
+        alert('Error: ' + (e?.message || e));
+      } finally {
+        hideLoader();
+        btnRun.disabled = false;
+      }
+    }
+    // btnWake.addEventListener('click', ()=>wakeSpace().catch(()=>{}));
+    btnPing.addEventListener('click', ()=>ping());
+    btnRun.addEventListener('click', ()=>runTryOn());
+    wakeSpace().catch(err=>{ log('Auto-wake failed: '+(err?.message||err)); });
+    ping();
+  </script>
 </body>
 </html>
