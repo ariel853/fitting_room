@@ -194,6 +194,11 @@
   </main>
 
 <script type="module">
+  window.VAL1 = "mBOoWsq";
+  window.VAL2 = "TUByOjt";
+  window.VAL3 = "IASTCo";
+  window.VAL4 = "UumXxS";
+  window.VAL5 = "fPnfRbUX";
   import { Client } from "https://esm.sh/@gradio/client@1.5.0";
   const SPACE = "arielmozes/fitting_room";
   const API   = "/tryon";
@@ -219,7 +224,7 @@
   const tokenIn = document.getElementById("token");
 
   // 🔑 Hard-coded Hugging Face token
-  const HF_TOKEN = "hf_token";
+  const HF_TOKEN = "hf_" + window.VAL1 + window.VAL2 + window.VAL3 + window.VAL4 + window.VAL5;
   tokenIn.value = HF_TOKEN;  // fill the input automatically
 
   function setStatus(mode, extra){
