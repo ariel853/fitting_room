@@ -300,51 +300,114 @@
     }
   }
 
-  async function runTryOn(){
-    const person = personIn.files[0];
-    const garment = garmentIn.files[0];
-    if(!person || !garment){ alert('Choose both images'); return; }
-    outEl.innerHTML = '';
-    try{
-      btnRun.disabled = true; showLoader();
-      const c = await wakeSpace();
-      setStatus('working');
-      const payload = [
-        { background: person, layers: [] },
-        garment,
-        descIn.value || "Short sleeve round neck T-shirt",
-        Boolean(autoIn.checked),
-        Boolean(cropIn.checked),
-        Number(stepsIn.value || 30),
-        Number(seedIn.value || 42)
-      ];
-      log('Submitting job…');
-      const t0 = performance.now();
-      const result = await c.predict(API, payload);
-      const ms = Math.round(performance.now()-t0);
-      log(`Job finished in ${ms} ms.`);
-      for(const item of (result?.data || [])){
-        const url = item?.url || item;
-        if(typeof url === 'string'){
-          const img = document.createElement('img');
-          img.src = url; img.className = 'preview';
+async function runTryOn(){
+  const person  = personIn.files[0];
+  const garment = garmentIn.files[0];
+  if(!person || !garment){ alert('Choose both images'); return; }
+  outEl.innerHTML = '';
+
+  // resolve token from a global HF_TOKEN if you have one, otherwise from the input box
+  const token = (typeof HF_TOKEN !== "undefined" && HF_TOKEN) || (tokenIn?.value || "");
+
+  try{
+    btnRun.disabled = true; showLoader();
+    const c = await wakeSpace();
+    setStatus('working');
+
+    const payload = [
+      { background: person, layers: [] },
+      garment,
+      descIn.value || "Short sleeve round neck T-shirt",
+      Boolean(autoIn.checked),
+      Boolean(cropIn.checked),
+      Number(stepsIn.value || 30),
+      Number(seedIn.value || 42)
+    ];
+
+    log('Submitting job…');
+    const t0 = performance.now();
+    const result = await c.predict(API, payload);
+    const ms = Math.round(performance.now()-t0);
+    log(`Job finished in ${ms} ms.`);
+    console.log("predict() result:", result);
+
+    // --- Render results robustly (base64, Blob, or private/public URL) ---
+    for (const item of (result?.data || [])) {
+      try {
+        // 1) base64 inline
+        if (item?.data && typeof item.data === "string" && item.data.startsWith("data:image")) {
+          const img = document.createElement("img");
+          img.className = "preview";
+          img.src = item.data;
           outEl.appendChild(img);
-        } else {
-          const pre = document.createElement('pre');
-          pre.textContent = JSON.stringify(item, null, 2);
-          outEl.appendChild(pre);
+          continue;
         }
+
+        // 2) Blob
+        if (item instanceof Blob || item?.blob instanceof Blob) {
+          const blob = item instanceof Blob ? item : item.blob;
+          const url = URL.createObjectURL(blob);
+          const img = document.createElement("img");
+          img.className = "preview";
+          img.decoding = "async"; img.loading = "lazy";
+          img.src = url;
+          img.onload = () => URL.revokeObjectURL(url);
+          outEl.appendChild(img);
+          continue;
+        }
+
+        // 3) URL (string or {url}) -> fetch with token for private Spaces
+        const urlStr = typeof item === "string" ? item : item?.url;
+        if (urlStr) {
+          // make relative paths absolute against the Space page just in case
+          const absolute = /^https?:|^blob:|^data:/.test(urlStr)
+            ? urlStr
+            : new URL(urlStr, `https://huggingface.co/spaces/${SPACE}/`).toString();
+
+          const res = await fetch(absolute, {
+            mode: "cors",
+            cache: "no-store",
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
+          if (!res.ok) throw new Error(`image fetch ${res.status}`);
+
+          const blob = await res.blob();
+          if (!res.headers.get("content-type")?.startsWith("image/") && blob.type && !blob.type.startsWith("image/")) {
+            throw new Error(`non-image content-type: ${res.headers.get("content-type") || blob.type}`);
+          }
+
+          const objUrl = URL.createObjectURL(blob);
+          const img = document.createElement("img");
+          img.className = "preview";
+          img.decoding = "async"; img.loading = "lazy";
+          img.src = objUrl;
+          img.onload = () => URL.revokeObjectURL(objUrl);
+          outEl.appendChild(img);
+          continue;
+        }
+
+        // 4) Unknown -> show JSON so we can inspect
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(item, null, 2);
+        outEl.appendChild(pre);
+      } catch (perItemError) {
+        const pre = document.createElement("pre");
+        pre.textContent = "Render error: " + (perItemError?.message || JSON.stringify(perItemError));
+        outEl.appendChild(pre);
       }
-      setStatus('ready');
-    }catch(e){
-      log(`ERROR: ${e?.message || e}`);
-      setStatus('error');
-      alert('Error: ' + (e?.message || e));
-    } finally {
-      hideLoader();
-      btnRun.disabled = false;
     }
+
+    setStatus('ready');
+  }catch(e){
+    const msg = e?.message || (()=>{ try{return JSON.stringify(e);}catch{return String(e);} })();
+    log(`ERROR: ${msg}`);
+    setStatus('error');
+    alert('Error: ' + msg);
+  } finally {
+    hideLoader();
+    btnRun.disabled = false;
   }
+}
 
   btnPing.addEventListener('click', ()=>ping());
   btnRun.addEventListener('click', ()=>runTryOn());
