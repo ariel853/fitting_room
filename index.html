@@ -50,13 +50,13 @@
     }
     .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
     .controls{
-        display:grid;
-        grid-template-columns: 2fr 0.5fr 0.5fr 1fr;
-        gap:12px;
-        margin-top:12px;
-      }
-      .controls input#desc{ width:100% }
-      #seed{ max-width:120px }
+      display:grid;
+      grid-template-columns: 2fr 1fr 0.8fr 0.8fr 1fr; /* desc | type | auto | crop | steps */
+      gap:12px;
+      margin-top:12px;
+    }
+    .controls input#desc{ width:100% }
+    #seed{ max-width:120px }
     label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
 
     input[type="text"], input[type="number"], select {
@@ -152,6 +152,17 @@
         <label>Garment description</label>
         <input id="desc" type="text" value="Short sleeve round neck T-shirt" />
       </div>
+
+      <!-- NEW: garment type -->
+      <div>
+        <label>Garment type</label>
+        <select id="gtype">
+          <option value="upper_body" selected>upper_body</option>
+          <option value="lower_body">lower_body</option>
+          <option value="dresses">dresses</option>
+        </select>
+      </div>
+
       <div>
         <label>Auto mask</label>
         <div class="row"><input id="auto" type="checkbox" checked /></div>
@@ -217,6 +228,7 @@
   const personPrev = document.getElementById("person-preview");
   const garmentPrev= document.getElementById("garment-preview");
   const descIn  = document.getElementById("desc");
+  const gtypeIn = document.getElementById("gtype");   // NEW
   const autoIn  = document.getElementById("auto");
   const cropIn  = document.getElementById("crop");
   const stepsIn = document.getElementById("steps");
@@ -300,114 +312,116 @@
     }
   }
 
-async function runTryOn(){
-  const person  = personIn.files[0];
-  const garment = garmentIn.files[0];
-  if(!person || !garment){ alert('Choose both images'); return; }
-  outEl.innerHTML = '';
+  async function runTryOn(){
+    const person  = personIn.files[0];
+    const garment = garmentIn.files[0];
+    if(!person || !garment){ alert('Choose both images'); return; }
+    outEl.innerHTML = '';
 
-  // resolve token from a global HF_TOKEN if you have one, otherwise from the input box
-  const token = (typeof HF_TOKEN !== "undefined" && HF_TOKEN) || (tokenIn?.value || "");
+    // resolve token from a global HF_TOKEN if you have one, otherwise from the input box
+    const token = (typeof HF_TOKEN !== "undefined" && HF_TOKEN) || (tokenIn?.value || "");
 
-  try{
-    btnRun.disabled = true; showLoader();
-    const c = await wakeSpace();
-    setStatus('working');
+    try{
+      btnRun.disabled = true; showLoader();
+      const c = await wakeSpace();
+      setStatus('working');
 
-    const payload = [
-      { background: person, layers: [] },
-      garment,
-      descIn.value || "Short sleeve round neck T-shirt",
-      Boolean(autoIn.checked),
-      Boolean(cropIn.checked),
-      Number(stepsIn.value || 30),
-      Number(seedIn.value || 42)
-    ];
+      // NOTE: matches app.py inputs:
+      // [imgs, garm_img, prompt, use_auto_mask, garment_type, use_crop, denoise_steps, seed]
+      const payload = [
+        { background: person, layers: [] },
+        garment,
+        descIn.value || "Short sleeve round neck T-shirt",
+        Boolean(autoIn.checked),
+        gtypeIn.value,                         // <-- garment_type
+        Boolean(cropIn.checked),
+        Number(stepsIn.value || 30),
+        Number(seedIn.value || 42)
+      ];
 
-    log('Submitting job…');
-    const t0 = performance.now();
-    const result = await c.predict(API, payload);
-    const ms = Math.round(performance.now()-t0);
-    log(`Job finished in ${ms} ms.`);
-    console.log("predict() result:", result);
+      log('Submitting job…');
+      const t0 = performance.now();
+      const result = await c.predict(API, payload);
+      const ms = Math.round(performance.now()-t0);
+      log(`Job finished in ${ms} ms.`);
+      console.log("predict() result:", result);
 
-    // --- Render results robustly (base64, Blob, or private/public URL) ---
-    for (const item of (result?.data || [])) {
-      try {
-        // 1) base64 inline
-        if (item?.data && typeof item.data === "string" && item.data.startsWith("data:image")) {
-          const img = document.createElement("img");
-          img.className = "preview";
-          img.src = item.data;
-          outEl.appendChild(img);
-          continue;
-        }
-
-        // 2) Blob
-        if (item instanceof Blob || item?.blob instanceof Blob) {
-          const blob = item instanceof Blob ? item : item.blob;
-          const url = URL.createObjectURL(blob);
-          const img = document.createElement("img");
-          img.className = "preview";
-          img.decoding = "async"; img.loading = "lazy";
-          img.src = url;
-          img.onload = () => URL.revokeObjectURL(url);
-          outEl.appendChild(img);
-          continue;
-        }
-
-        // 3) URL (string or {url}) -> fetch with token for private Spaces
-        const urlStr = typeof item === "string" ? item : item?.url;
-        if (urlStr) {
-          // make relative paths absolute against the Space page just in case
-          const absolute = /^https?:|^blob:|^data:/.test(urlStr)
-            ? urlStr
-            : new URL(urlStr, `https://huggingface.co/spaces/${SPACE}/`).toString();
-
-          const res = await fetch(absolute, {
-            mode: "cors",
-            cache: "no-store",
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-          });
-          if (!res.ok) throw new Error(`image fetch ${res.status}`);
-
-          const blob = await res.blob();
-          if (!res.headers.get("content-type")?.startsWith("image/") && blob.type && !blob.type.startsWith("image/")) {
-            throw new Error(`non-image content-type: ${res.headers.get("content-type") || blob.type}`);
+      // --- Render results robustly (base64, Blob, or private/public URL) ---
+      for (const item of (result?.data || [])) {
+        try {
+          // 1) base64 inline
+          if (item?.data && typeof item.data === "string" && item.data.startsWith("data:image")) {
+            const img = document.createElement("img");
+            img.className = "preview";
+            img.src = item.data;
+            outEl.appendChild(img);
+            continue;
           }
 
-          const objUrl = URL.createObjectURL(blob);
-          const img = document.createElement("img");
-          img.className = "preview";
-          img.decoding = "async"; img.loading = "lazy";
-          img.src = objUrl;
-          img.onload = () => URL.revokeObjectURL(objUrl);
-          outEl.appendChild(img);
-          continue;
+          // 2) Blob
+          if (item instanceof Blob || item?.blob instanceof Blob) {
+            const blob = item instanceof Blob ? item : item.blob;
+            const url = URL.createObjectURL(blob);
+            const img = document.createElement("img");
+            img.className = "preview";
+            img.decoding = "async"; img.loading = "lazy";
+            img.src = url;
+            img.onload = () => URL.revokeObjectURL(url);
+            outEl.appendChild(img);
+            continue;
+          }
+
+          // 3) URL (string or {url}) -> fetch with token for private Spaces
+          const urlStr = typeof item === "string" ? item : item?.url;
+          if (urlStr) {
+            const absolute = /^https?:|^blob:|^data:/.test(urlStr)
+              ? urlStr
+              : new URL(urlStr, `https://huggingface.co/spaces/${SPACE}/`).toString();
+
+            const res = await fetch(absolute, {
+              mode: "cors",
+              cache: "no-store",
+              headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
+            if (!res.ok) throw new Error(`image fetch ${res.status}`);
+
+            const blob = await res.blob();
+            if (!res.headers.get("content-type")?.startsWith("image/") && blob.type && !blob.type.startsWith("image/")) {
+              throw new Error(`non-image content-type: ${res.headers.get("content-type") || blob.type}`);
+            }
+
+            const objUrl = URL.createObjectURL(blob);
+            const img = document.createElement("img");
+            img.className = "preview";
+            img.decoding = "async"; img.loading = "lazy";
+            img.src = objUrl;
+            img.onload = () => URL.revokeObjectURL(objUrl);
+            outEl.appendChild(img);
+            continue;
+          }
+
+          // 4) Unknown -> show JSON so we can inspect
+          const pre = document.createElement("pre");
+          pre.textContent = JSON.stringify(item, null, 2);
+          outEl.appendChild(pre);
+        } catch (perItemError) {
+          const pre = document.createElement("pre");
+          pre.textContent = "Render error: " + (perItemError?.message || JSON.stringify(perItemError));
+          outEl.appendChild(pre);
         }
-
-        // 4) Unknown -> show JSON so we can inspect
-        const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(item, null, 2);
-        outEl.appendChild(pre);
-      } catch (perItemError) {
-        const pre = document.createElement("pre");
-        pre.textContent = "Render error: " + (perItemError?.message || JSON.stringify(perItemError));
-        outEl.appendChild(pre);
       }
-    }
 
-    setStatus('ready');
-  }catch(e){
-    const msg = e?.message || (()=>{ try{return JSON.stringify(e);}catch{return String(e);} })();
-    log(`ERROR: ${msg}`);
-    setStatus('error');
-    alert('Error: ' + msg);
-  } finally {
-    hideLoader();
-    btnRun.disabled = false;
+      setStatus('ready');
+    }catch(e){
+      const msg = e?.message || (()=>{ try{return JSON.stringify(e);}catch{return String(e);} })();
+      log(`ERROR: ${msg}`);
+      setStatus('error');
+      alert('Error: ' + msg);
+    } finally {
+      hideLoader();
+      btnRun.disabled = false;
+    }
   }
-}
 
   btnPing.addEventListener('click', ()=>ping());
   btnRun.addEventListener('click', ()=>runTryOn());
