@@ -74,6 +74,18 @@
       transform:translateY(-1px); filter:saturate(1.08); box-shadow:0 8px 24px rgba(215,123,186,.36);
     }
 
+    .input-file {
+      display: flex;
+      align-items: center;   /* centers the button + filename */
+    }
+    .input-file::file-selector-button,
+    .input-file::-webkit-file-upload-button {
+      height: 100%;          /* same height as parent */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     #loader{display:none; text-align:center; margin-top:24px}
     .spinner{border:4px solid var(--dim); border-top:4px solid var(--accent); border-radius:50%; width:36px; height:36px; animation:spin 1s linear infinite; margin:0 auto 10px}
     @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
@@ -305,4 +317,5 @@
 </script>
 </body>
 </html>
+
 
