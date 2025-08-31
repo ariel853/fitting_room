@@ -95,7 +95,7 @@
       <span id="status-text">Idle</span>
     </span>
     <span id="uptime" class="hint"></span>
-    <button id="ping" class="btn secondary" title="Ping view_api() to check readiness">Ping</button>
+<!--     <button id="ping" class="btn secondary" title="Ping view_api() to check readiness">Ping</button> -->
   </header>
 
   <main class="card">
@@ -181,7 +181,7 @@
   const logEl      = document.getElementById("log");
   const outEl      = document.getElementById("out");
   const loaderEl   = document.getElementById("loader");
-  const btnPing = document.getElementById("ping");
+  // const btnPing = document.getElementById("ping");
   const btnRun  = document.getElementById("run");
   const personIn = document.getElementById("person");
   const garmentIn= document.getElementById("garment");
@@ -298,10 +298,11 @@
     }finally{ hideLoader(); btnRun.disabled = false; }
   }
 
-  btnPing.addEventListener('click', ()=>ping());
+  // btnPing.addEventListener('click', ()=>ping());
   btnRun .addEventListener('click', ()=>runTryOn());
   wakeSpace().catch(err=>{ log('Auto-wake failed: '+(err?.message||err)); });
   ping();
 </script>
 </body>
 </html>
+
