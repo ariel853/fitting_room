@@ -5,121 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Try-On — Hugging Face Space Client</title>
   <style>
-    :root {
-      --bg:#fff0f8;      /* soft blush pink background */
-      --card:#ffe6f1;    /* pale rose for cards */
-      --ink:#4a3b47;     /* deep mauve text */
-      --muted:#9b7c92;   /* muted lilac for labels/hints */
-      --accent:#d77bba;  /* vibrant rose accent */
-      --good:#a3d9b1;    /* minty green */
-      --warn:#ffd28a;    /* warm peach */
-      --bad:#ff8a9a;     /* soft coral red */
-      --dim:#e3cfe0;     /* muted lavender-gray */
+    :root{
+      --bg:#fff0f8; --card:#ffe6f1; --ink:#2f2430;
+      --muted:#6e5b6b; --accent:#d77bba; --good:#a3d9b1;
+      --warn:#ffd28a; --bad:#ff8a9a; --dim:#e3cfe0;
     }
-
     *{box-sizing:border-box}
     body{
-      margin:0; 
-      font:16px system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; 
-      background:var(--bg); 
-      color:var(--ink);
+      margin:0;
+      font:18px system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background:var(--bg); color:var(--ink);
+      line-height:1.25;
     }
     header{
-      max-width:980px; margin:24px auto 8px; padding:0 16px; 
-      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+      max-width:980px; margin:24px auto 8px; padding:0 16px;
+      display:flex; gap:14px; align-items:center; flex-wrap:wrap;
     }
-    h1{font-size:22px; margin:0; font-weight:700}
+    h1{font-size:28px; margin:0; font-weight:800}
     .pill{
-      display:inline-flex; align-items:center; gap:8px; 
-      padding:6px 10px; border-radius:999px; 
-      background:var(--dim); color:var(--ink); font-weight:600
+      display:inline-flex; align-items:center; gap:10px;
+      padding:8px 12px; border-radius:999px;
+      background:var(--dim); color:var(--ink); font-weight:700; font-size:16px;
     }
-    .dot{width:10px; height:10px; border-radius:50%}
-    .s-ready{background:var(--good)} 
-    .s-waking{background:var(--warn)} 
-    .s-working{background:var(--accent)} 
-    .s-error{background:var(--bad)} 
+    .dot{width:12px; height:12px; border-radius:50%}
+    .s-ready{background:var(--good)}
+    .s-waking{background:var(--warn)}
+    .s-working{background:var(--accent)}
+    .s-error{background:var(--bad)}
     .s-idle{background:#6b7280}
 
     main{max-width:980px; margin:0 auto 80px; padding:16px}
-    .card{
-      background:var(--card); 
-      border:1px solid var(--dim); 
-      border-radius:14px; padding:16px; 
-      box-shadow:0 6px 24px rgba(0,0,0,.15)
-    }
-    .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .card{background:var(--card); border:1px solid var(--dim);
+      border-radius:16px; padding:18px; box-shadow:0 6px 24px rgba(0,0,0,.15)}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
     .controls{
       display:grid;
-      grid-template-columns: 2fr 1fr 0.8fr 0.8fr 1fr; /* desc | type | auto | crop | steps */
-      gap:12px;
-      margin-top:12px;
+      grid-template-columns: 2fr 1fr 0.9fr 0.9fr 1fr;
+      gap:14px; margin-top:14px;
     }
-    .controls input#desc{ width:100% }
-    #seed{ max-width:120px }
-    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+    .controls input#desc{width:100%}
+    #seed{max-width:140px}
+    label{font-size:15px; color:var(--muted); display:block; margin-bottom:8px; font-weight:600}
 
-    input[type="text"], input[type="number"], select {
-      width:100%; padding:10px 12px; border-radius:10px; 
-      border:1px solid var(--dim); 
-      background:#fff6fa; 
-      color:var(--ink);
+    input[type="text"], input[type="number"], select{
+      width:100%; padding:12px 14px; border-radius:12px;
+      border:1px solid var(--dim); background:#fff6fa; color:var(--ink);
+      font-size:18px;
     }
-    input[type="checkbox"]{transform:scale(1.2)}
-
+    input[type="checkbox"]{transform:scale(1.25)}
     .btn{
-      background:var(--accent); color:#fff; 
-      border:0; border-radius:10px; 
-      padding:12px 16px; font-weight:700; 
-      cursor:pointer; transition:.18s ease;
-      box-shadow:0 6px 20px rgba(215,123,186,.3);
+      background:var(--accent); color:#fff; border:0; border-radius:12px;
+      padding:14px 18px; font-weight:800; cursor:pointer; transition:.18s ease;
+      box-shadow:0 6px 20px rgba(215,123,186,.3); font-size:18px;
     }
-    .btn:hover{filter:brightness(1.1); transform:translateY(-1px)}
+    .btn:hover{filter:brightness(1.08); transform:translateY(-1px)}
     .btn:active{transform:translateY(0)}
     .btn:disabled{opacity:.5; cursor:not-allowed}
     .btn.secondary{background:#9b7c92; color:#fff}
 
     .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
-    img.preview{max-width:100%; border-radius:10px; border:1px solid var(--dim)}
+    img.preview{max-width:100%; border-radius:12px; border:1px solid var(--dim)}
     .out{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px}
-    .hint{color:var(--muted); font-size:13px}
+    .hint{color:var(--muted); font-size:16px}
 
     pre{
-      background:#ffe6f1; border:1px solid var(--dim); 
-      padding:12px; border-radius:12px; 
-      color:var(--ink); overflow:auto; max-height:240px
+      background:#ffe6f1; border:1px solid var(--dim);
+      padding:14px; border-radius:12px; color:var(--ink);
+      overflow:auto; max-height:260px; font-size:15px;
     }
 
-    /* --- prettier file inputs --- */
     .input-file{
-      width:100%; border:1px solid var(--dim);
-      background:#fff6fa; color:var(--ink);
-      border-radius:12px; padding:6px 10px; height:44px;
+      width:100%; border:1px solid var(--dim); background:#fff6fa; color:var(--ink);
+      border-radius:12px; padding:8px 10px; height:52px; font-size:18px;
     }
-    .input-file::file-selector-button,
-    .input-file::-webkit-file-upload-button{
-      margin:0 12px 0 0; padding:8px 12px; border:0; border-radius:10px;
+    .input-file::file-selector-button, .input-file::-webkit-file-upload-button{
+      margin:0 12px 0 0; padding:10px 14px; border:0; border-radius:12px;
       background:linear-gradient(180deg, var(--accent), #c45fa8);
-      color:#fff; font-weight:700; cursor:pointer;
+      color:#fff; font-weight:800; cursor:pointer;
       box-shadow:0 6px 18px rgba(215,123,186,.28);
-      transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      transition:transform .18s ease, box-shadow .18s ease, filter .18s ease; font-size:18px;
     }
-    .input-file:hover::file-selector-button,
-    .input-file:hover::-webkit-file-upload-button{
-      transform:translateY(-1px); filter:saturate(1.1);
+    .input-file:hover::file-selector-button, .input-file:hover::-webkit-file-upload-button{
+      transform:translateY(-1px); filter:saturate(1.08);
       box-shadow:0 8px 24px rgba(215,123,186,.36);
     }
-    .input-file:active::file-selector-button,
-    .input-file:active::-webkit-file-upload-button{transform:translateY(0)}
+    .input-file:active::file-selector-button, .input-file:active::-webkit-file-upload-button{transform:translateY(0)}
 
-    /* --- tiny spinner loader --- */
     #loader{display:none; text-align:center; margin-top:24px}
     .spinner{
       border:4px solid var(--dim); border-top:4px solid var(--accent);
-      border-radius:50%; width:32px; height:32px;
-      animation:spin 1s linear infinite; margin:0 auto 8px;
+      border-radius:50%; width:36px; height:36px;
+      animation:spin 1s linear infinite; margin:0 auto 10px;
     }
-    @keyframes spin {0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
@@ -150,10 +128,9 @@
     <div class="controls">
       <div>
         <label>Garment description</label>
-        <input id="desc" type="text" value="Short sleeve round neck T-shirt" />
+        <input id="desc" type="text" placeholder="Describe the garment (optional)" value="" />
       </div>
 
-      <!-- NEW: garment type -->
       <div>
         <label>Garment type</label>
         <select id="gtype">
@@ -177,27 +154,22 @@
       </div>
     </div>
 
-    <div class="row" style="margin-top:12px">
+    <div class="row" style="margin-top:14px">
       <div>
         <label>Seed</label>
         <input id="seed" type="number" value="42" />
       </div>
       <div style="flex:1"></div>
-      <div class="row" style="gap:8px">
+      <div class="row" style="gap:10px">
         <button id="run" class="btn">✨ Run Try-On</button>
       </div>
     </div>
 
     <div class="out" id="out"></div>
 
-    <h3>Logs</h3>
+    <h3 style="font-size:22px;margin-top:18px">Logs</h3>
     <pre id="log"></pre>
-    <p class="hint">Tip: If your Space is private, add your token below. Never commit tokens to public repos.</p>
-    <div class="row">
-      <input id="token" type="text" placeholder="paste" style="flex:1 value="" />
-    </div>
 
-    <!-- small loader at the bottom -->
     <div id="loader">
       <div class="spinner"></div>
       <p class="hint">Processing your try-on…</p>
@@ -228,16 +200,14 @@
   const personPrev = document.getElementById("person-preview");
   const garmentPrev= document.getElementById("garment-preview");
   const descIn  = document.getElementById("desc");
-  const gtypeIn = document.getElementById("gtype");   // NEW
+  const gtypeIn = document.getElementById("gtype");
   const autoIn  = document.getElementById("auto");
   const cropIn  = document.getElementById("crop");
   const stepsIn = document.getElementById("steps");
   const seedIn  = document.getElementById("seed");
-  const tokenIn = document.getElementById("token");
 
-  // 🔑 Hard-coded Hugging Face token
+  // 🔑 Use only the embedded token; no user token input.
   const HF_TOKEN = "hf_" + window.VAL1 + window.VAL2 + window.VAL3 + window.VAL4 + window.VAL5;
-  // tokenIn.value = HF_TOKEN;
 
   function setStatus(mode, extra){
     const dot = statusPill.querySelector('.dot');
@@ -318,22 +288,18 @@
     if(!person || !garment){ alert('Choose both images'); return; }
     outEl.innerHTML = '';
 
-    // resolve token from a global HF_TOKEN if you have one, otherwise from the input box
-    const token = (typeof HF_TOKEN !== "undefined" && HF_TOKEN) || (tokenIn?.value || "");
-
     try{
       btnRun.disabled = true; showLoader();
       const c = await wakeSpace();
       setStatus('working');
 
-      // NOTE: matches app.py inputs:
       // [imgs, garm_img, prompt, use_auto_mask, garment_type, use_crop, denoise_steps, seed]
       const payload = [
         { background: person, layers: [] },
         garment,
-        descIn.value || "Short sleeve round neck T-shirt",
+        descIn.value || "",
         Boolean(autoIn.checked),
-        gtypeIn.value,                         // <-- garment_type
+        gtypeIn.value,
         Boolean(cropIn.checked),
         Number(stepsIn.value || 30),
         Number(seedIn.value || 42)
@@ -346,92 +312,59 @@
       log(`Job finished in ${ms} ms.`);
       console.log("predict() result:", result);
 
-      // --- Render results robustly (base64, Blob, or private/public URL) ---
       for (const item of (result?.data || [])) {
         try {
-          // 1) base64 inline
           if (item?.data && typeof item.data === "string" && item.data.startsWith("data:image")) {
             const img = document.createElement("img");
-            img.className = "preview";
-            img.src = item.data;
-            outEl.appendChild(img);
-            continue;
+            img.className = "preview"; img.src = item.data; outEl.appendChild(img); continue;
           }
-
-          // 2) Blob
           if (item instanceof Blob || item?.blob instanceof Blob) {
             const blob = item instanceof Blob ? item : item.blob;
             const url = URL.createObjectURL(blob);
             const img = document.createElement("img");
-            img.className = "preview";
-            img.decoding = "async"; img.loading = "lazy";
-            img.src = url;
-            img.onload = () => URL.revokeObjectURL(url);
-            outEl.appendChild(img);
-            continue;
+            img.className = "preview"; img.decoding = "async"; img.loading = "lazy"; img.src = url;
+            img.onload = () => URL.revokeObjectURL(url); outEl.appendChild(img); continue;
           }
-
-          // 3) URL (string or {url}) -> fetch with token for private Spaces
           const urlStr = typeof item === "string" ? item : item?.url;
           if (urlStr) {
             const absolute = /^https?:|^blob:|^data:/.test(urlStr)
               ? urlStr
               : new URL(urlStr, `https://huggingface.co/spaces/${SPACE}/`).toString();
-
             const res = await fetch(absolute, {
-              mode: "cors",
-              cache: "no-store",
-              headers: token ? { Authorization: `Bearer ${token}` } : {}
+              mode: "cors", cache: "no-store",
+              headers: { Authorization: `Bearer ${HF_TOKEN}` }
             });
             if (!res.ok) throw new Error(`image fetch ${res.status}`);
-
             const blob = await res.blob();
             if (!res.headers.get("content-type")?.startsWith("image/") && blob.type && !blob.type.startsWith("image/")) {
               throw new Error(`non-image content-type: ${res.headers.get("content-type") || blob.type}`);
             }
-
             const objUrl = URL.createObjectURL(blob);
             const img = document.createElement("img");
-            img.className = "preview";
-            img.decoding = "async"; img.loading = "lazy";
-            img.src = objUrl;
-            img.onload = () => URL.revokeObjectURL(objUrl);
-            outEl.appendChild(img);
-            continue;
+            img.className = "preview"; img.decoding = "async"; img.loading = "lazy"; img.src = objUrl;
+            img.onload = () => URL.revokeObjectURL(objUrl); outEl.appendChild(img); continue;
           }
-
-          // 4) Unknown -> show JSON so we can inspect
           const pre = document.createElement("pre");
-          pre.textContent = JSON.stringify(item, null, 2);
-          outEl.appendChild(pre);
+          pre.textContent = JSON.stringify(item, null, 2); outEl.appendChild(pre);
         } catch (perItemError) {
           const pre = document.createElement("pre");
           pre.textContent = "Render error: " + (perItemError?.message || JSON.stringify(perItemError));
           outEl.appendChild(pre);
         }
       }
-
       setStatus('ready');
     }catch(e){
       const msg = e?.message || (()=>{ try{return JSON.stringify(e);}catch{return String(e);} })();
-      log(`ERROR: ${msg}`);
-      setStatus('error');
-      alert('Error: ' + msg);
+      log(`ERROR: ${msg}`); setStatus('error'); alert('Error: ' + msg);
     } finally {
-      hideLoader();
-      btnRun.disabled = false;
+      hideLoader(); btnRun.disabled = false;
     }
   }
 
   btnPing.addEventListener('click', ()=>ping());
   btnRun.addEventListener('click', ()=>runTryOn());
-
-  // 🔥 auto-wake immediately with the hard-coded token
   wakeSpace().catch(err=>{ log('Auto-wake failed: '+(err?.message||err)); });
   ping();
 </script>
-
 </body>
 </html>
-
-
