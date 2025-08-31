@@ -14,43 +14,37 @@
     body{
       margin:0;
       font:18px system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background:var(--bg); color:var(--ink);
-      line-height:1.25;
+      background:var(--bg); color:var(--ink); line-height:1.25;
     }
     header{
       max-width:980px; margin:24px auto 8px; padding:0 16px;
       display:flex; gap:14px; align-items:center; flex-wrap:wrap;
     }
     h1{font-size:28px; margin:0; font-weight:800}
-    .pill{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:8px 12px; border-radius:999px;
-      background:var(--dim); color:var(--ink); font-weight:700; font-size:16px;
-    }
+    .pill{display:inline-flex; align-items:center; gap:10px; padding:8px 12px; border-radius:999px;
+      background:var(--dim); color:var(--ink); font-weight:700; font-size:16px}
     .dot{width:12px; height:12px; border-radius:50%}
-    .s-ready{background:var(--good)}
-    .s-waking{background:var(--warn)}
-    .s-working{background:var(--accent)}
-    .s-error{background:var(--bad)}
-    .s-idle{background:#6b7280}
+    .s-ready{background:var(--good)} .s-waking{background:var(--warn)}
+    .s-working{background:var(--accent)} .s-error{background:var(--bad)} .s-idle{background:#6b7280}
 
     main{max-width:980px; margin:0 auto 80px; padding:16px}
-    .card{background:var(--card); border:1px solid var(--dim);
-      border-radius:16px; padding:18px; box-shadow:0 6px 24px rgba(0,0,0,.15)}
+    .card{background:var(--card); border:1px solid var(--dim); border-radius:16px; padding:18px; box-shadow:0 6px 24px rgba(0,0,0,.15)}
     .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
-    .controls{
-      display:grid;
-      grid-template-columns: 2fr 1fr 0.9fr 0.9fr 1fr;
-      gap:14px; margin-top:14px;
+
+    /* --- NEW: split controls into two clear rows --- */
+    .controls{display:grid; gap:16px; margin-top:14px}
+    .controls-rowA{
+      display:grid; grid-template-columns:2fr 1fr; gap:14px; align-items:end;
     }
-    .controls input#desc{width:100%}
-    #seed{max-width:140px}
+    .controls-rowB{
+      display:grid; grid-template-columns:0.9fr 0.9fr 1fr 1fr; gap:14px; align-items:end;
+    }
+
     label{font-size:15px; color:var(--muted); display:block; margin-bottom:8px; font-weight:600}
 
     input[type="text"], input[type="number"], select{
       width:100%; padding:12px 14px; border-radius:12px;
-      border:1px solid var(--dim); background:#fff6fa; color:var(--ink);
-      font-size:18px;
+      border:1px solid var(--dim); background:#fff6fa; color:var(--ink); font-size:18px;
     }
     input[type="checkbox"]{transform:scale(1.25)}
     .btn{
@@ -59,45 +53,38 @@
       box-shadow:0 6px 20px rgba(215,123,186,.3); font-size:18px;
     }
     .btn:hover{filter:brightness(1.08); transform:translateY(-1px)}
-    .btn:active{transform:translateY(0)}
-    .btn:disabled{opacity:.5; cursor:not-allowed}
-    .btn.secondary{background:#9b7c92; color:#fff}
+    .btn:active{transform:translateY(0)} .btn:disabled{opacity:.5; cursor:not-allowed}
+    .btn.secondary{background:#9b7c92}
 
     .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
     img.preview{max-width:100%; border-radius:12px; border:1px solid var(--dim)}
     .out{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px}
     .hint{color:var(--muted); font-size:16px}
 
-    pre{
-      background:#ffe6f1; border:1px solid var(--dim);
-      padding:14px; border-radius:12px; color:var(--ink);
-      overflow:auto; max-height:260px; font-size:15px;
-    }
+    pre{background:#ffe6f1; border:1px solid var(--dim); padding:14px; border-radius:12px; color:var(--ink); overflow:auto; max-height:260px; font-size:15px}
 
-    .input-file{
-      width:100%; border:1px solid var(--dim); background:#fff6fa; color:var(--ink);
-      border-radius:12px; padding:8px 10px; height:52px; font-size:18px;
-    }
+    .input-file{width:100%; border:1px solid var(--dim); background:#fff6fa; color:var(--ink); border-radius:12px; padding:8px 10px; height:52px; font-size:18px}
     .input-file::file-selector-button, .input-file::-webkit-file-upload-button{
       margin:0 12px 0 0; padding:10px 14px; border:0; border-radius:12px;
       background:linear-gradient(180deg, var(--accent), #c45fa8);
-      color:#fff; font-weight:800; cursor:pointer;
-      box-shadow:0 6px 18px rgba(215,123,186,.28);
+      color:#fff; font-weight:800; cursor:pointer; box-shadow:0 6px 18px rgba(215,123,186,.28);
       transition:transform .18s ease, box-shadow .18s ease, filter .18s ease; font-size:18px;
     }
     .input-file:hover::file-selector-button, .input-file:hover::-webkit-file-upload-button{
-      transform:translateY(-1px); filter:saturate(1.08);
-      box-shadow:0 8px 24px rgba(215,123,186,.36);
+      transform:translateY(-1px); filter:saturate(1.08); box-shadow:0 8px 24px rgba(215,123,186,.36);
     }
-    .input-file:active::file-selector-button, .input-file:active::-webkit-file-upload-button{transform:translateY(0)}
 
     #loader{display:none; text-align:center; margin-top:24px}
-    .spinner{
-      border:4px solid var(--dim); border-top:4px solid var(--accent);
-      border-radius:50%; width:36px; height:36px;
-      animation:spin 1s linear infinite; margin:0 auto 10px;
-    }
+    .spinner{border:4px solid var(--dim); border-top:4px solid var(--accent); border-radius:50%; width:36px; height:36px; animation:spin 1s linear infinite; margin:0 auto 10px}
     @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+
+    /* --- Mobile: make it airier and stack neatly --- */
+    @media (max-width: 560px){
+      .grid{grid-template-columns:1fr}
+      .controls-rowA{grid-template-columns:1fr; gap:12px}
+      .controls-rowB{grid-template-columns:1fr 1fr; gap:12px}
+      .btn{width:100%}
+    }
   </style>
 </head>
 <body>
@@ -125,42 +112,46 @@
       </div>
     </div>
 
+    <!-- CONTROLS -->
     <div class="controls">
-      <div>
-        <label>Garment description</label>
-        <input id="desc" type="text" placeholder="Describe the garment (optional)" value="" />
+      <!-- Row A: description + type -->
+      <div class="controls-rowA">
+        <div>
+          <label>Garment description</label>
+          <input id="desc" type="text" placeholder="Describe the garment (optional)" value="" />
+        </div>
+        <div>
+          <label>Garment type</label>
+          <select id="gtype">
+            <option value="upper_body" selected>upper_body</option>
+            <option value="lower_body">lower_body</option>
+            <option value="dresses">dresses</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label>Garment type</label>
-        <select id="gtype">
-          <option value="upper_body" selected>upper_body</option>
-          <option value="lower_body">lower_body</option>
-          <option value="dresses">dresses</option>
-        </select>
+      <!-- Row B: auto, crop, steps, seed -->
+      <div class="controls-rowB">
+        <div>
+          <label>Auto mask</label>
+          <div class="row"><input id="auto" type="checkbox" checked /></div>
+        </div>
+        <div>
+          <label>Crop & resize</label>
+          <div class="row"><input id="crop" type="checkbox" /></div>
+        </div>
+        <div>
+          <label>Denoise steps</label>
+          <input id="steps" type="number" min="10" max="60" value="30" />
+        </div>
+        <div>
+          <label>Seed</label>
+          <input id="seed" type="number" value="42" />
+        </div>
       </div>
 
-      <div>
-        <label>Auto mask</label>
-        <div class="row"><input id="auto" type="checkbox" checked /></div>
-      </div>
-      <div>
-        <label>Crop & resize</label>
-        <div class="row"><input id="crop" type="checkbox" /></div>
-      </div>
-      <div>
-        <label>Denoise steps</label>
-        <input id="steps" type="number" min="10" max="60" value="30" />
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:14px">
-      <div>
-        <label>Seed</label>
-        <input id="seed" type="number" value="42" />
-      </div>
-      <div style="flex:1"></div>
-      <div class="row" style="gap:10px">
+      <!-- Run button -->
+      <div class="row" style="justify-content:flex-end">
         <button id="run" class="btn">✨ Run Try-On</button>
       </div>
     </div>
@@ -177,11 +168,8 @@
   </main>
 
 <script type="module">
-  window.VAL1 = "mBOoWsq";
-  window.VAL2 = "TUByOjt";
-  window.VAL3 = "IASTCo";
-  window.VAL4 = "UumXxS";
-  window.VAL5 = "fPnfRbUX";
+  // obfuscated token parts
+  window.VAL1 = "mBOoWsq"; window.VAL2 = "TUByOjt"; window.VAL3 = "IASTCo"; window.VAL4 = "UumXxS"; window.VAL5 = "fPnfRbUX";
   import { Client } from "https://esm.sh/@gradio/client@1.5.0";
   const SPACE = "arielmozes/fitting_room";
   const API   = "/tryon";
@@ -206,12 +194,10 @@
   const stepsIn = document.getElementById("steps");
   const seedIn  = document.getElementById("seed");
 
-  // 🔑 Use only the embedded token; no user token input.
   const HF_TOKEN = "hf_" + window.VAL1 + window.VAL2 + window.VAL3 + window.VAL4 + window.VAL5;
 
   function setStatus(mode, extra){
-    const dot = statusPill.querySelector('.dot');
-    dot.className = 'dot s-idle';
+    const dot = statusPill.querySelector('.dot'); dot.className = 'dot s-idle';
     let txt = 'Idle';
     if(mode==='waking'){ dot.className='dot s-waking'; txt='Waking…'; }
     if(mode==='ready'){ dot.className='dot s-ready'; txt='Ready'; }
@@ -221,19 +207,10 @@
   }
   function showLoader(){ loaderEl.style.display = "block"; }
   function hideLoader(){ loaderEl.style.display = "none"; }
-  function log(msg){
-    const time = new Date().toLocaleTimeString();
-    logEl.textContent += `[${time}] ${msg}\n`;
-    logEl.scrollTop = logEl.scrollHeight;
-  }
+  function log(msg){ const t=new Date().toLocaleTimeString(); logEl.textContent += `[${t}] ${msg}\n`; logEl.scrollTop = logEl.scrollHeight; }
   function preview(input, container){
-    container.innerHTML = '';
-    const f = input.files[0];
-    if(!f) return;
-    const img = document.createElement('img');
-    img.className = 'preview';
-    img.src = URL.createObjectURL(f);
-    container.appendChild(img);
+    container.innerHTML = ''; const f = input.files[0]; if(!f) return;
+    const img = document.createElement('img'); img.className='preview'; img.src = URL.createObjectURL(f); container.appendChild(img);
   }
   personIn.addEventListener('change', ()=>preview(personIn, personPrev));
   garmentIn.addEventListener('change', ()=>preview(garmentIn, garmentPrev));
@@ -245,41 +222,23 @@
     client = await Client.connect(SPACE, { hf_token: HF_TOKEN });
     return client;
   }
-
   async function wakeSpace({timeoutMs=120000, pollMs=3000}={}){
-    setStatus('waking');
-    const start = Date.now(); let attempt = 0;
+    setStatus('waking'); const start = Date.now(); let attempt = 0;
     while(Date.now() - start < timeoutMs){
       attempt++;
       try{
-        const c = await connectOnce();
-        await c.view_api();
+        const c = await connectOnce(); await c.view_api();
         const took = Math.round((Date.now()-start)/1000);
-        setStatus('ready', took+ 's');
-        uptimeEl.textContent = `woke in ${took}s`;
-        log(`Space is ready (after ${took}s, attempt ${attempt}).`);
-        return c;
-      }catch(e){
-        log(`Wake attempt ${attempt} failed: ${e?.message || e}`);
-        await sleep(pollMs);
-      }
+        setStatus('ready', took+ 's'); uptimeEl.textContent = `woke in ${took}s`;
+        log(`Space is ready (after ${took}s, attempt ${attempt}).`); return c;
+      }catch(e){ log(`Wake attempt ${attempt} failed: ${e?.message || e}`); await sleep(pollMs); }
     }
-    setStatus('error', 'wake timeout');
-    throw new Error('Wake timeout');
+    setStatus('error', 'wake timeout'); throw new Error('Wake timeout');
   }
-
   async function ping(){
-    try{
-      const t0 = performance.now();
-      const c = await connectOnce();
-      await c.view_api();
-      const ms = Math.round(performance.now()-t0);
-      log(`Ping OK (${ms} ms)`);
-      setStatus('ready');
-    }catch(e){
-      log(`Ping error: ${e?.message || e}`);
-      setStatus('waking');
-    }
+    try{ const t0=performance.now(); const c = await connectOnce(); await c.view_api();
+      const ms=Math.round(performance.now()-t0); log(`Ping OK (${ms} ms)`); setStatus('ready');
+    }catch(e){ log(`Ping error: ${e?.message || e}`); setStatus('waking'); }
   }
 
   async function runTryOn(){
@@ -287,11 +246,9 @@
     const garment = garmentIn.files[0];
     if(!person || !garment){ alert('Choose both images'); return; }
     outEl.innerHTML = '';
-
     try{
       btnRun.disabled = true; showLoader();
-      const c = await wakeSpace();
-      setStatus('working');
+      const c = await wakeSpace(); setStatus('working');
 
       // [imgs, garm_img, prompt, use_auto_mask, garment_type, use_crop, denoise_steps, seed]
       const payload = [
@@ -305,64 +262,44 @@
         Number(seedIn.value || 42)
       ];
 
-      log('Submitting job…');
-      const t0 = performance.now();
+      log('Submitting job…'); const t0=performance.now();
       const result = await c.predict(API, payload);
-      const ms = Math.round(performance.now()-t0);
-      log(`Job finished in ${ms} ms.`);
-      console.log("predict() result:", result);
+      const ms = Math.round(performance.now()-t0); log(`Job finished in ${ms} ms.`);
 
       for (const item of (result?.data || [])) {
-        try {
-          if (item?.data && typeof item.data === "string" && item.data.startsWith("data:image")) {
-            const img = document.createElement("img");
-            img.className = "preview"; img.src = item.data; outEl.appendChild(img); continue;
+        try{
+          if (item?.data && typeof item.data === "string" && item.data.startsWith("data:image")){
+            const img=document.createElement("img"); img.className="preview"; img.src=item.data; outEl.appendChild(img); continue;
           }
-          if (item instanceof Blob || item?.blob instanceof Blob) {
-            const blob = item instanceof Blob ? item : item.blob;
-            const url = URL.createObjectURL(blob);
-            const img = document.createElement("img");
-            img.className = "preview"; img.decoding = "async"; img.loading = "lazy"; img.src = url;
-            img.onload = () => URL.revokeObjectURL(url); outEl.appendChild(img); continue;
+          if (item instanceof Blob || item?.blob instanceof Blob){
+            const blob=item instanceof Blob?item:item.blob; const url=URL.createObjectURL(blob);
+            const img=document.createElement("img"); img.className="preview"; img.decoding="async"; img.loading="lazy"; img.src=url;
+            img.onload=()=>URL.revokeObjectURL(url); outEl.appendChild(img); continue;
           }
           const urlStr = typeof item === "string" ? item : item?.url;
-          if (urlStr) {
-            const absolute = /^https?:|^blob:|^data:/.test(urlStr)
-              ? urlStr
-              : new URL(urlStr, `https://huggingface.co/spaces/${SPACE}/`).toString();
-            const res = await fetch(absolute, {
-              mode: "cors", cache: "no-store",
-              headers: { Authorization: `Bearer ${HF_TOKEN}` }
-            });
-            if (!res.ok) throw new Error(`image fetch ${res.status}`);
+          if (urlStr){
+            const absolute = /^https?:|^blob:|^data:/.test(urlStr) ? urlStr : new URL(urlStr, `https://huggingface.co/spaces/${SPACE}/`).toString();
+            const res = await fetch(absolute, { mode:"cors", cache:"no-store", headers:{Authorization:`Bearer ${HF_TOKEN}`}});
+            if(!res.ok) throw new Error(`image fetch ${res.status}`);
             const blob = await res.blob();
-            if (!res.headers.get("content-type")?.startsWith("image/") && blob.type && !blob.type.startsWith("image/")) {
-              throw new Error(`non-image content-type: ${res.headers.get("content-type") || blob.type}`);
-            }
             const objUrl = URL.createObjectURL(blob);
-            const img = document.createElement("img");
-            img.className = "preview"; img.decoding = "async"; img.loading = "lazy"; img.src = objUrl;
-            img.onload = () => URL.revokeObjectURL(objUrl); outEl.appendChild(img); continue;
+            const img=document.createElement("img"); img.className="preview"; img.decoding="async"; img.loading="lazy"; img.src=objUrl;
+            img.onload=()=>URL.revokeObjectURL(objUrl); outEl.appendChild(img); continue;
           }
-          const pre = document.createElement("pre");
-          pre.textContent = JSON.stringify(item, null, 2); outEl.appendChild(pre);
-        } catch (perItemError) {
-          const pre = document.createElement("pre");
-          pre.textContent = "Render error: " + (perItemError?.message || JSON.stringify(perItemError));
-          outEl.appendChild(pre);
+          const pre=document.createElement("pre"); pre.textContent=JSON.stringify(item,null,2); outEl.appendChild(pre);
+        }catch(perItemError){
+          const pre=document.createElement("pre"); pre.textContent="Render error: "+(perItemError?.message||JSON.stringify(perItemError)); outEl.appendChild(pre);
         }
       }
       setStatus('ready');
     }catch(e){
       const msg = e?.message || (()=>{ try{return JSON.stringify(e);}catch{return String(e);} })();
       log(`ERROR: ${msg}`); setStatus('error'); alert('Error: ' + msg);
-    } finally {
-      hideLoader(); btnRun.disabled = false;
-    }
+    }finally{ hideLoader(); btnRun.disabled = false; }
   }
 
   btnPing.addEventListener('click', ()=>ping());
-  btnRun.addEventListener('click', ()=>runTryOn());
+  btnRun .addEventListener('click', ()=>runTryOn());
   wakeSpace().catch(err=>{ log('Auto-wake failed: '+(err?.message||err)); });
   ping();
 </script>
